@@ -46,18 +46,50 @@ public class Day01 : IDay
 		return zeroes;
 	}
 
+	private static int TurnDialAdvanced(int start, int[] turns)
+	{
+		int zeroes = 0;
+		int value = start;
+
+		foreach (int turn in turns)
+		{
+			int newValue = value + turn;
+
+			if (newValue == 0)
+			{
+				zeroes++;
+			}
+			else if (newValue < 0)
+			{
+				if (value == 0) zeroes--;
+				zeroes += Math.Abs(newValue / 100) + 1;
+				newValue = Utils.Modulus(newValue, 100);
+			}
+			else if (newValue > 99)
+			{
+				zeroes += newValue / 100;
+				newValue = Utils.Modulus(newValue, 100);
+			}
+
+			value = newValue;
+		}
+
+		return zeroes;
+	}
 
 	public static void Run(string[] args)
 	{
 		int[] testTurns = ParseInput("Inputs/day01test.txt");
 		int testCode = TurnDial(50, testTurns);
 		Console.WriteLine($"Test Code: {testCode}");
+		int testCode2 = TurnDialAdvanced(50, testTurns);
+		Console.WriteLine($"Test Code 2: {testCode2}");
 
 		int[] realTurns = ParseInput("Inputs/day01real.txt");
 		int realCode = TurnDial(50, realTurns);
 		Console.WriteLine($"Real Code: {realCode}");
-
-
+		int realCode2 = TurnDialAdvanced(50, realTurns);
+		Console.WriteLine($"Real Code 2: {realCode2}");
 	}
 
 }
