@@ -3,23 +3,23 @@ namespace AdventOfCode.Days;
 public class Day03 : IDay
 {
 
-	public static List<int[]> ParseInput(string path)
+	public static List<List<int>> ParseInput(string path)
 	{
 		string input = File.ReadAllText(path);
 		string[] lines = input.Split("\n");
-		List<int[]> result = [];
+		List<List<int>> result = [];
 
 		foreach (string line in lines)
 		{
 			if (line.Length == 0) continue;
 
-			int[] convertedLine = new int[line.Length - 1];
+			List<int> convertedLine = [];
 
 			for (int i = 0; i < line.Length - 1; i++)
 			{
 				string slice = line.Substring(i, 1);
 				int intval = int.Parse(slice);
-				convertedLine[i] = intval;
+				convertedLine.Add(intval);
 			}
 
 			result.Add(convertedLine);
@@ -28,18 +28,17 @@ public class Day03 : IDay
 		return result;
 	}
 
-	private static int LargestJoltage(int[] jolts)
+	private static int LargestJoltage(List<int> jolts)
 	{
 		int largest = 0;
 
-		for (int i = 0; i < jolts.Length; i++)
+		for (int i = 0; i < jolts.Count; i++)
 		{
 			int firstDigit = jolts[i] * 10;
 
-			for (int j = i + 1; j < jolts.Length; j++)
+			for (int j = i + 1; j < jolts.Count; j++)
 			{
-				int secondDigit = jolts[j];
-				int number = firstDigit + secondDigit;
+				int number = firstDigit + jolts[j];
 				if (number > largest)
 				{
 					largest = number;
@@ -50,45 +49,43 @@ public class Day03 : IDay
 		return largest;
 	}
 
-	private static long LargestDangerJoltage(int[] jolts, int[] permutation, int index)
+	private static long LargestDangerJoltage(List<int> jolts)
 	{
-		if (index >= jolts.Length)
+
+		while (jolts.Count > 12)
 		{
-			if (permutation.Length == 12)
+			for (int i = 0; i < jolts.Count - 1;)
 			{
-				long number = 0;
-				for (int i = 0; i < permutation.Length; i++)
+				if (jolts[i] <= jolts[i + 1])
 				{
-					long value = permutation[i];
-					for (int p = permutation.Length - 1; p > i; p--)
-					{
-						value *= 10;
-					}
-					number += value;
+
+					jolts.RemoveAt(i);
+					if (jolts.Count == 12) break;
 				}
-				return number;
-			}
-			else
-			{
-				return -1;
+				else
+				{
+					i++;
+				}
 			}
 		}
 
-		int currentElement = jolts[index];
-		long branchWithCurrent = LargestDangerJoltage(jolts, [.. permutation, currentElement], index + 1);
-		long branchWithoutCurrent = LargestDangerJoltage(jolts, permutation, index + 1);
-
-		return Math.Max(branchWithCurrent, branchWithoutCurrent);
-	}
-
-	private static long LargestDangerJoltage(int[] jolts)
-	{
-		return LargestDangerJoltage(jolts, [], 0);
+		long number = 0;
+		for (int i = 0; i < jolts.Count; i++)
+		{
+			long value = jolts[i];
+			for (int p = jolts.Count - 1; p > i; p--)
+			{
+				value *= 10;
+			}
+			number += value;
+		}
+		return number;
 	}
 
 	public static void Run(string[] args)
 	{
-		List<int[]> testInput = ParseInput("Inputs/day03test.txt");
+		List<List<int>> testInput = ParseInput("Inputs/day03test.txt");
+
 		int testTotal = testInput.Aggregate(0, (acc, line) =>
 		{
 			int joltage = LargestJoltage(line);
@@ -103,7 +100,7 @@ public class Day03 : IDay
 		Console.WriteLine($"Test Total: {testTotal}");
 		Console.WriteLine($"Test Danger Total: {testDangerTotal}");
 
-		List<int[]> realInput = ParseInput("Inputs/day03real.txt");
+		List<List<int>> realInput = ParseInput("Inputs/day03real.txt");
 		int realTotal = realInput.Aggregate(0, (acc, line) =>
 		{
 			int joltage = LargestJoltage(line);
@@ -112,12 +109,11 @@ public class Day03 : IDay
 		long realDangerTotal = realInput.Aggregate(0L, (acc, line) =>
 		{
 			long joltage = LargestDangerJoltage(line);
-			Console.WriteLine(joltage);
+			//Console.WriteLine(joltage);
 			return acc + joltage;
 		});
 		Console.WriteLine($"Real Total: {realTotal}");
 		Console.WriteLine($"Real Danger Total: {realDangerTotal}");
-
 
 	}
 }
