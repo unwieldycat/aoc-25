@@ -51,29 +51,37 @@ public class Day03 : IDay
 
 	private static long LargestDangerJoltage(List<int> jolts)
 	{
+		List<int> optimizedNumber = [];
 
-		while (jolts.Count > 12)
+		int prevMaxIdx = 0;
+
+		for (int n = 11; n >= 0; n--)
 		{
-			for (int i = 0; i < jolts.Count - 1;)
-			{
-				if (jolts[i] <= jolts[i + 1])
-				{
+			int max = 0;
+			int maxIdx = 0;
 
-					jolts.RemoveAt(i);
-					if (jolts.Count == 12) break;
-				}
-				else
+			for (int i = prevMaxIdx; i < jolts.Count - n; i++)
+			{
+				int digit = jolts[i];
+				if (digit > max)
 				{
-					i++;
+					maxIdx = i;
+					max = digit;
 				}
 			}
+
+			jolts[maxIdx] = -1;
+			prevMaxIdx = maxIdx;
+			optimizedNumber.Add(max);
 		}
 
+
+		// Makes the final number a number
 		long number = 0;
-		for (int i = 0; i < jolts.Count; i++)
+		for (int i = 0; i < optimizedNumber.Count; i++)
 		{
-			long value = jolts[i];
-			for (int p = jolts.Count - 1; p > i; p--)
+			long value = optimizedNumber[i];
+			for (int p = optimizedNumber.Count - 1; p > i; p--)
 			{
 				value *= 10;
 			}
@@ -109,7 +117,6 @@ public class Day03 : IDay
 		long realDangerTotal = realInput.Aggregate(0L, (acc, line) =>
 		{
 			long joltage = LargestDangerJoltage(line);
-			//Console.WriteLine(joltage);
 			return acc + joltage;
 		});
 		Console.WriteLine($"Real Total: {realTotal}");
