@@ -23,9 +23,9 @@ public class Day04 : IDay
 		return board[row][col] == "@" ? 1 : 0;
 	}
 
-	private static int CountAccessible(List<List<string>> board)
+	private static List<(int, int)> GetAccessible(List<List<string>> board)
 	{
-		int count = 0;
+		List<(int, int)> accessible = [];
 
 		for (int r = 0; r < board.Count; r++)
 		{
@@ -43,11 +43,36 @@ public class Day04 : IDay
 					}
 				}
 
-				if (adjacent <= 4) count++;
+				if (adjacent <= 4) accessible.Add((r, c));
 			}
 		}
 
+		return accessible;
+	}
+
+	private static int CountAccessible(List<List<string>> board)
+	{
+		List<(int, int)> accessible = GetAccessible(board);
+		return accessible.Count;
+	}
+
+	private static int TotalRemovable(List<List<string>> board)
+	{
+		List<(int, int)> accessible;
+		int count = 0;
+
+		do
+		{
+			accessible = GetAccessible(board);
+			count += accessible.Count;
+			foreach (var (row, col) in accessible)
+			{
+				board[row][col] = ".";
+			}
+		} while (accessible.Count > 0);
+
 		return count;
+
 	}
 
 	public static void Run(string[] args)
@@ -55,9 +80,13 @@ public class Day04 : IDay
 		List<List<string>> testBoard = ParseInput("Inputs/day04test.txt");
 		int testAccessible = CountAccessible(testBoard);
 		Console.WriteLine($"Test accessible {testAccessible} ");
+		int testRemovable = TotalRemovable(testBoard);
+		Console.WriteLine($"Test removable {testRemovable}");
 
 		List<List<string>> realBoard = ParseInput("Inputs/day04real.txt");
 		int accessible = CountAccessible(realBoard);
 		Console.WriteLine($"Real accessible {accessible} ");
+		int removable = TotalRemovable(realBoard);
+		Console.WriteLine($"Real removable {removable}");
 	}
 }
