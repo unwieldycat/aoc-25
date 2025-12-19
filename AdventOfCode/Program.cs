@@ -27,6 +27,9 @@ class Program
 			case "day04":
 				Day04.Run(remainingArgs);
 				break;
+			case "day05":
+				Day05.Run(remainingArgs);
+				break;
 			default:
 				Console.WriteLine($"Invalid day: {day}");
 				break;
