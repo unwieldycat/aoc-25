@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace AdventOfCode.Days;
 
 public class Day07 : IDay
@@ -63,19 +65,41 @@ public class Day07 : IDay
 		return splits;
 	}
 
-	public static int GenerateTimelines(char[,] grid, int r)
+	public static string CreateMemoKey(char[,] grid, int row)
 	{
+		int rows = grid.GetLength(0);
+		int cols = grid.GetLength(1);
+		StringBuilder sb = new();
+
+		for (int r = 0; r < rows; r++)
+		{
+			for (int c = 0; c < cols; c++)
+			{
+				sb.Append(grid[r, c]);
+			}
+			sb.Append('\n');
+		}
+
+		return $"{row}:{sb}";
+	}
+
+	public static int GenerateTimelines(char[,] grid, int r, Dictionary<string, int> memo)
+	{
+		string memoKey = CreateMemoKey(grid, r);
+		if (memo.TryGetValue(memoKey, out int cachedResult))
+		{
+			return cachedResult;
+		}
+
 		if (r >= grid.GetLength(0))
 		{
 			return 1;
 		}
 
-		//PrintGrid(grid);
-
 		int cols = grid.GetLength(1);
 		int timelines = 0;
 
-		List<char[,]> newGrids = new List<char[,]>();
+		List<char[,]> newGrids = [];
 		bool hitSplitter = false;
 
 		for (int c = 0; c < cols; c++)
@@ -119,8 +143,10 @@ public class Day07 : IDay
 
 		foreach (char[,] newGrid in newGrids)
 		{
-			timelines += GenerateTimelines(newGrid, r + 1);
+			timelines += GenerateTimelines(newGrid, r + 1, memo);
 		}
+
+		memo[memoKey] = timelines;
 
 		return timelines;
 	}
@@ -139,7 +165,7 @@ public class Day07 : IDay
 
 	public static int GenerateTimelines(char[,] grid)
 	{
-		return GenerateTimelines(grid, 0);
+		return GenerateTimelines(grid, 0, []);
 	}
 
 	public static void Run(string[] args)
