@@ -63,14 +63,97 @@ public class Day07 : IDay
 		return splits;
 	}
 
+	public static int GenerateTimelines(char[,] grid, int r)
+	{
+		if (r >= grid.GetLength(0))
+		{
+			return 1;
+		}
+
+		//PrintGrid(grid);
+
+		int cols = grid.GetLength(1);
+		int timelines = 0;
+
+		List<char[,]> newGrids = new List<char[,]>();
+		bool hitSplitter = false;
+
+		for (int c = 0; c < cols; c++)
+		{
+			// Source beam
+			if (grid[r, c] == 'S')
+			{
+				grid[r + 1, c] = '|';
+			}
+
+			if (r - 1 >= 0 && grid[r - 1, c] == '|')
+			{
+				// Space under beam
+				if (grid[r, c] == '.')
+				{
+					grid[r, c] = '|';
+				}
+				else if (grid[r, c] == '^') // Splitter under beam
+				{
+					hitSplitter = true;
+
+					// Space to left of splitter
+					if (c - 1 >= 0 && grid[r, c - 1] == '.')
+					{
+						char[,] newGrid = (char[,])grid.Clone();
+						newGrid[r, c - 1] = '|';
+						newGrids.Add(newGrid);
+					}
+					// Space to the right of splitter
+					if (c + 1 < cols && grid[r, c + 1] == '.')
+					{
+						char[,] newGrid = (char[,])grid.Clone();
+						newGrid[r, c + 1] = '|';
+						newGrids.Add(newGrid);
+					}
+				}
+			}
+		}
+
+		if (!hitSplitter) newGrids.Add(grid);
+
+		foreach (char[,] newGrid in newGrids)
+		{
+			timelines += GenerateTimelines(newGrid, r + 1);
+		}
+
+		return timelines;
+	}
+
+	public static void PrintGrid(char[,] grid)
+	{
+		for (int r = 0; r < grid.GetLength(0); r++)
+		{
+			for (int c = 0; c < grid.GetLength(1); c++)
+			{
+				Console.Write(grid[r, c]);
+			}
+			Console.WriteLine();
+		}
+	}
+
+	public static int GenerateTimelines(char[,] grid)
+	{
+		return GenerateTimelines(grid, 0);
+	}
+
 	public static void Run(string[] args)
 	{
 		char[,] testInput = ParseInput("Inputs/day07test.txt");
-		int testSplits = GenerateBeam(testInput);
+		int testSplits = GenerateBeam((char[,])testInput.Clone());
 		Console.WriteLine($"Test Splits: {testSplits}");
+		int testTimelines = GenerateTimelines(testInput);
+		Console.WriteLine($"Test Timelines: {testTimelines}");
 
 		char[,] input = ParseInput("Inputs/day07real.txt");
-		int splits = GenerateBeam(input);
+		int splits = GenerateBeam((char[,])input.Clone());
 		Console.WriteLine($"Splits: {splits}");
+		int timelines = GenerateTimelines(input);
+		Console.WriteLine($"Timelines: {timelines}");
 	}
 }
